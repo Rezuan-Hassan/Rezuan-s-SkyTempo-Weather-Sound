@@ -1,25 +1,30 @@
-// Functionality and Dynamic Logic
-
-// --- CRITICAL CONFIGURATION ---
-// You must get a free API key from a weather service like OpenWeatherMap.
-// Replace the text below with your actual API key.
-const apiKey = "81d08391553eae1bd3c05eaab792126f";
-const defaultCity = "Calfin Danang"; // A custom default
+// --- CONFIGURATION ---
+// Paste your actual OpenWeatherMap API key below
+const apiKey = "PASTE_YOUR_OPENWEATHERMAP_API_KEY_HERE";
+const defaultCity = "Dhaka"; // Fixed default city
 
 // --- UI Element Selectors ---
 const locationInput = document.getElementById('location-input');
 const searchButton = document.getElementById('search-button');
 const playlistLinkInput = document.getElementById('playlist-link-input');
 const loadPlaylistBtn = document.getElementById('load-playlist-btn');
-const ytPlayerPlaceholder = document.getElementById('yt-player-placeholder');
+const ytPlayerContainer = document.getElementById('yt-player-container');
+const sidebarIcons = document.querySelectorAll('.nav-icons i, .nav-icons-music i');
+
+// --- Sidebar Interaction Logic ---
+sidebarIcons.forEach(icon => {
+    icon.addEventListener('click', function() {
+        // Remove active class from all icons
+        document.querySelectorAll('.side-nav i').forEach(nav => nav.classList.remove('active'));
+        // Add active class to the clicked icon
+        this.classList.add('active');
+    });
+});
 
 // --- Main Weather Logic ---
-
-// Get data for a city from the API
 async function fetchWeatherData(city) {
-    // If you don't use a key, the site won't break, it just uses default mock data.
     if (apiKey === "PASTE_YOUR_OPENWEATHERMAP_API_KEY_HERE") {
-        console.warn("API Key is missing. Using placeholder data. Check scripts.js");
+        console.warn("API Key is missing. Using demo data.");
         updateMockWeatherData(city);
         return;
     }
@@ -28,50 +33,59 @@ async function fetchWeatherData(city) {
 
     try {
         const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error('Location not found');
-        const data = await response.ok ? await response.json() : null;
+        if (!response.ok) {
+            // Only alert if the user actively searched for something that failed
+            if (city !== defaultCity) alert("Location not found. Please try a different city name.");
+            return;
+        }
+        const data = await response.json();
         updateUI(data);
     } catch (error) {
-        alert("Location not found. Please try again.");
+        console.error("Error fetching weather data:", error);
     }
 }
 
-// Update the dynamic elements based on real data
+// Update the UI with real data
 function updateUI(data) {
     if (!data) return;
 
-    // 1. Current Conditions Side Panel
     document.getElementById('current-city').innerHTML = `<i class="fas fa-location-dot"></i> ${data.name}`;
     document.getElementById('main-temp').innerText = `${Math.round(data.main.temp)}° C`;
-    document.querySelector('.meta-item:nth-child(1) span').innerText = `${data.wind.speed} mph`;
+    document.querySelector('.meta-item:nth-child(1) span').innerText = `${data.wind.speed} m/s`;
     document.querySelector('.meta-item:nth-child(2) span').innerText = `${data.main.humidity}%`;
-    document.querySelector('.meta-item:nth-child(3) span').innerText = `${(data.rain ? data.rain['1h'] : 0).toFixed(2)} mm`;
-
-    // 2. Main Large Dashboard
-    const condition = data.weather[0].main; // e.g., 'Rain', 'Clouds', 'Clear'
-    document.querySelector('.main-condition-text').innerText = `${condition} with ${data.weather[0].description}`;
     
-    // 3. Dynamic Background
+    // Check if rain data exists, otherwise default to 0
+    const rainVol = data.rain && data.rain['1h'] ? data.rain['1h'] : 0;
+    document.querySelector('.meta-item:nth-child(3) span').innerText = `${rainVol.toFixed(2)} mm`;
+
+    const condition = data.weather[0].main; 
+    const description = data.weather[0].description;
+    
+    // Capitalize the first letter of the description
+    const formattedDesc = description.charAt(0).toUpperCase() + description.slice(1);
+    
+    document.querySelector('.main-condition-text').innerText = `${condition}`;
+    document.querySelector('.detailed-desc').innerText = `Current conditions: ${formattedDesc}. Dynamic weather generated via OpenWeather API.`;
+    
     changeDynamicBackground(condition);
 }
 
-// Update UI with static/mock data if no API key is present
+// Demo data fallback
 function updateMockWeatherData(city) {
-    // Use the values from your original prompt image as the mock data.
-    document.getElementById('current-city').innerHTML = `<i class="fas fa-location-dot"></i> ${city} (Demo Mode)`;
-    document.getElementById('main-temp').innerText = `10° C`;
-    document.querySelector('.meta-item:nth-child(1) span').innerText = `19 mph`;
-    document.querySelector('.meta-item:nth-child(2) span').innerText = `40%`;
-    document.querySelector('.meta-item:nth-child(3) span').innerText = `1.15 mm`;
-    document.querySelector('.main-condition-text').innerText = `Strom with Heavy Rain (Demo)`;
-    
-    changeDynamicBackground('Storm'); // Always stormy in demo
+    document.getElementById('current-city').innerHTML = `<i class="fas fa-location-dot"></i> ${city} (Demo)`;
+    document.getElementById('main-temp').innerText = `28° C`;
+    document.querySelector('.meta-item:nth-child(1) span').innerText = `12 m/s`;
+    document.querySelector('.meta-item:nth-child(2) span').innerText = `65%`;
+    document.querySelector('.meta-item:nth-child(3) span').innerText = `0.00 mm`;
+    document.querySelector('.main-condition-text').innerText = `Cloudy`;
+    document.querySelector('.detailed-desc').innerText = `Please enter your API key to see live weather data for ${city}.`;
+    changeDynamicBackground('Clouds');
 }
 
-// Change the dynamic background of the website based on weather
+// Dynamic Backgrounds
 function changeDynamicBackground(weatherCondition) {
     const body = document.body;
-    body.className = ''; // clear all classes
+    body.className = ''; 
     
     switch (weatherCondition.toLowerCase()) {
         case 'clear':
@@ -80,31 +94,21 @@ function changeDynamicBackground(weatherCondition) {
             break;
         case 'rain':
         case 'drizzle':
-        case 'storm':
         case 'thunderstorm':
             body.classList.add('weather-stormy');
             break;
         default:
-            body.classList.add('weather-default'); // the original cloudy field
+            body.classList.add('weather-default');
     }
 }
 
-// --- Music Player Logic (using YouTube API) ---
-let ytPlayer;
-
-// Extracts a playlist ID from a YouTube link (complex regex)
+// --- Music Player Logic (Robust Iframe Method) ---
 function getPlaylistIdFromLink(url) {
     const regex = /[&?]list=([^&]+)/i;
     const match = url.match(regex);
     return match && match[1] ? match[1] : null;
 }
 
-// Loads the YouTube IFrame Player API. The function name *must* match this for YT to work.
-window.onYouTubeIframeAPIReady = function() {
-    console.log("YouTube API is ready.");
-};
-
-// Loads a playlist when the user pastes a link
 loadPlaylistBtn.addEventListener('click', () => {
     const link = playlistLinkInput.value.trim();
     if (!link) return;
@@ -115,33 +119,33 @@ loadPlaylistBtn.addEventListener('click', () => {
         return;
     }
 
-    // Replace the placeholder div with the player iframe
-    ytPlayerPlaceholder.innerHTML = ''; 
-    ytPlayer = new YT.Player('yt-player-placeholder', {
-        height: '300',
-        width: '100%',
-        playerVars: {
-            listType: 'playlist',
-            list: playlistId,
-            autoplay: 1, // Optional: Start playing immediately
-            modestbranding: 1, // Less visible YouTube logo
-            rel: 0 // Show related videos from same playlist
-        }
-    });
+    // Direct HTML iframe injection (Fixes Error 150/153 and works much better locally)
+    ytPlayerContainer.innerHTML = `
+        <iframe 
+            width="100%" 
+            height="100%" 
+            src="https://www.youtube.com/embed/videoseries?list=${playlistId}&autoplay=1" 
+            title="Rezuan's YouTube Playlist" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            allowfullscreen
+            style="border-radius: 15px;">
+        </iframe>
+    `;
 });
 
-// --- Event Listeners and Startup ---
+// --- Event Listeners ---
 searchButton.addEventListener('click', () => {
     const city = locationInput.value.trim();
-    if (city) { fetchWeatherData(city); }
+    if (city) fetchWeatherData(city);
 });
 
 locationInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         const city = locationInput.value.trim();
-        if (city) { fetchWeatherData(city); }
+        if (city) fetchWeatherData(city);
     }
 });
 
-// Fetch initial data (either real or mock)
+// Start up
 fetchWeatherData(defaultCity);
