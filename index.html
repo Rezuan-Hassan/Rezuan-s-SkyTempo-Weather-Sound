@@ -44,11 +44,11 @@
                     <div class="user-controls">
                         <div class="control-icons">
                             <i class="fas fa-plus-circle"></i>
-                            <i class="fas fa-sync-alt"></i>
+                            <i class="fas fa-sync-alt" style="cursor:pointer;" onclick="location.reload()"></i>
                             <i class="fas fa-bell"></i>
                         </div>
                         <div class="user-avatar">
-                            <img src="https://via.placeholder.com/32" alt="Calfin Avatar">
+                            <img src="https://ui-avatars.com/api/?name=Rezuan+Hassan&background=50b3a2&color=fff" alt="Rezuan Avatar" style="width:35px; border-radius:50%;">
                         </div>
                     </div>
                 </header>
@@ -59,8 +59,8 @@
                         <div class="card-top">
                             <span class="forecast-tag">Weather Forecast</span>
                             <div class="condition-display">
-                                <h1 class="main-condition-text">Strom with Heavy Rain</h1>
-                                <p class="detailed-desc">Partly cloudy with occasional rain showers. Dynamic conditions based on current location data.</p>
+                                <h1 class="main-condition-text">Loading Weather...</h1>
+                                <p class="detailed-desc">Fetching dynamic conditions based on current location data.</p>
                             </div>
                         </div>
                         
@@ -90,29 +90,29 @@
                     <aside class="current-and-locations">
                         <div class="current-condition-large glass-panel">
                             <div class="current-header">
-                                <span id="current-city"><i class="fas fa-location-dot"></i> Central Jakarta</span>
+                                <span id="current-city"><i class="fas fa-location-dot"></i> Loading...</span>
                             </div>
-                            <h1 id="main-temp">10° C</h1>
+                            <h1 id="main-temp">--° C</h1>
                             <div class="current-meta">
-                                <div class="meta-item"><i class="fas fa-wind"></i> <span>19 mph</span></div>
-                                <div class="meta-item"><i class="fas fa-tint"></i> <span>40%</span></div>
-                                <div class="meta-item"><i class="fas fa-cloud-rain"></i> <span>1.15 mm</span></div>
+                                <div class="meta-item"><i class="fas fa-wind"></i> <span>-- mph</span></div>
+                                <div class="meta-item"><i class="fas fa-tint"></i> <span>--%</span></div>
+                                <div class="meta-item"><i class="fas fa-cloud-rain"></i> <span>-- mm</span></div>
                             </div>
                         </div>
 
                         <div class="locations-list glass-panel">
                             <h3>Popular Locations</h3>
                             <div class="location-item">
-                                <div class="loc-text">Indonesia<br><strong>North Jakarta</strong><br><small>Sunny</small></div>
-                                <div class="loc-data">12° <i class="fas fa-sun"></i></div>
+                                <div class="loc-text">Bangladesh<br><strong>Dhaka</strong><br><small>Sunny</small></div>
+                                <div class="loc-data">32° <i class="fas fa-sun"></i></div>
                             </div>
                             <div class="location-item">
                                 <div class="loc-text">Indonesia<br><strong>Bandung</strong><br><small>Cloudy</small></div>
-                                <div class="loc-data">10° <i class="fas fa-cloud"></i></div>
+                                <div class="loc-data">22° <i class="fas fa-cloud"></i></div>
                             </div>
                             <div class="location-item active-loc">
-                                <div class="loc-text">Indonesia<br><strong>South Jakarta</strong><br><small>Strom</small></div>
-                                <div class="loc-data">14° <i class="fas fa-bolt"></i></div>
+                                <div class="loc-text">UK<br><strong>London</strong><br><small>Rain</small></div>
+                                <div class="loc-data">14° <i class="fas fa-cloud-rain"></i></div>
                             </div>
                         </div>
                     </aside>
@@ -122,14 +122,14 @@
 
             <section class="music-player-panel glass-panel">
                 <div class="player-controls">
-                    <h3>Calfin's Playlist: Mood Beats</h3>
+                    <h3>Rezuan's Playlist: Mood Beats</h3>
                     <div class="playlist-input-group">
                         <input type="text" id="playlist-link-input" placeholder="Paste YouTube Playlist Link Here">
                         <button id="load-playlist-btn">Load Playlist</button>
                     </div>
                 </div>
                 
-                <div class="youtube-player-container">
+                <div class="youtube-player-container" id="yt-player-container">
                     <div id="yt-player-placeholder">Playlist will appear here.</div>
                 </div>
             </section>
@@ -139,6 +139,5 @@
     </div>
 
     <script src="scripts.js"></script>
-    <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>
