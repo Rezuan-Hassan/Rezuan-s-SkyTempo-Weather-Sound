@@ -1,6 +1,6 @@
 // --- CONFIGURATION ---
 // Paste your actual OpenWeatherMap API key below
-const apiKey = "PASTE_YOUR_OPENWEATHERMAP_API_KEY_HERE";
+const apiKey = "81d08391553eae1bd3c05eaab792126f";
 const defaultCity = "Dhaka"; // Fixed default city
 
 // --- UI Element Selectors ---
